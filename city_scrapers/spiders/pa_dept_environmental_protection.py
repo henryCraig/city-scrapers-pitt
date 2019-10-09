@@ -5,25 +5,23 @@ import re
 import datetime
 
 
-
 class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
     name = "pa_dept_environmental_protection"
     agency = "PA Department of Environmental Protection"
     timezone = "America/New_York"
     allowed_domains = ["www.ahs.dep.pa.gov"]
     start_urls = ["http://www.ahs.dep.pa.gov/CalendarOfEvents/Default.aspx?list=true"]
-    custom_settings = {'ROBOTSTXT_OBEY' : False}
-
+    custom_settings = {'ROBOTSTXT_OBEY': False}
 
     def parse(self, response):
         for meetingChunk in response.xpath('//div[@class = "centered_div padtop"]').getall():
             if '<strong>' in meetingChunk:
                 meeting = Meeting(
-                    title = self._parse_title(meetingChunk),
+                    title=self._parse_title(meetingChunk),
                     description=self._parse_description(meetingChunk),
-                    location = self._parse_location(meetingChunk),
-                    time_notes = self._parse_time_notes(meetingChunk),
-                    start = self._parse_start(meetingChunk),
+                    location=self._parse_location(meetingChunk),
+                    time_notes=self._parse_time_notes(meetingChunk),
+                    start=self._parse_start(meetingChunk),
                     end=self._parse_end(meetingChunk),
 
 
