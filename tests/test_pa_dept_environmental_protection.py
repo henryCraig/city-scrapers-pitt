@@ -17,9 +17,6 @@ spider = PaDeptEnvironmentalProtectionSpider()
 freezer = freeze_time("2019-08-28")
 freezer.start()
 
-
-#Ok so, here we have the parsed items this test will refer to the entire time
-#I believe these parsed items come from the parse() method in the spider
 parsed_items = [item for item in spider.parse(test_response)]
 
 freezer.stop()
@@ -30,29 +27,18 @@ freezer.stop()
 Uncomment below
 """
 
-# def test_title():
-#     print("Hello?  This thing on?")
-#     print(type(parsed_items))
-#     print(len(parsed_items))
-#
-#     #parsed_items is a list
-#     #I'm getting an index error currently because it's a list with nothing inside of it
-#     #That's the problem
-#
-#     #For some reason parsed item
-#
-#     assert parsed_items[0]["title"] == "titleOfMeeting"
+def test_title():
+    assert parsed_items[0]["title"] == "Agricultural Advisory Board (AAB) meeting"
 
+def test_description():
+    print("parsed_items[0]: ", parsed_items[0]["description"])
+    assert parsed_items[0]["description"] == "Joint Meeting with Nutrient Management Advisory"
 
-# def test_description():
-#     print("parsed_items[0]: ", parsed_items[0])
-#     assert parsed_items[0]["description"] == "EXPECTED DESCRIPTION"
-
-def test_location():
-    print("hello?")
-    print(parsed_items[0]['location'])
-    print("There it is")
-    assert parsed_items[0]["location"][:38] == "Pennsylvania Department of Agriculture"
+# def test_location():
+#     print("hello?")
+#     print(parsed_items[0]['location'])
+#     print("There it is")
+#     assert parsed_items[0]["location"] == "Pennsylvania Department of Agricu"
 
     # """Pennsylvania Department of Agriculture
     # 2301 North Cameron Street, Room 309
@@ -65,21 +51,24 @@ def test_location_two():
     print("Time Notes 8: ", parsed_items[8]["time_notes"])
     print("Description of Meeting 8:", parsed_items[8]["description"])
     print("Location: ", parsed_items[8]["location"])
-    print("Start: ", parsed_items[0]["start"])
+    print("Start: ", parsed_items[8]["start"])
+    print("End: ", parsed_items[8]["end"])
     print('\n')
 
     print("Title of Meeting 9:", parsed_items[9]["title"])
     print("Time Notes 9: ", parsed_items[9]["time_notes"])
     print("Description of Meeting 9:", parsed_items[9]["description"])
     print("Location: ", parsed_items[9]["location"])
-    #print("Start: ", parsed_items[9]["start"])
+    print("Start: ", parsed_items[9]["start"])
+    print("End: ", parsed_items[10]["end"])
     print('\n')
 
     print("Title of Meeting 10:", parsed_items[10]["title"])
     print("Time Notes 10: ", parsed_items[10]["time_notes"])
     print("Description of Meeting 10:", parsed_items[10]["description"])
     print("Location: ", parsed_items[10]["location"])
-    #print("Start: ", parsed_items[10]["start"])
+    print("Start: ", parsed_items[10]["start"])
+    print("End: ", parsed_items[10]["end"])
     print('\n')
 
 
@@ -94,13 +83,18 @@ def test_location_two():
 
     #assert parsed_items[1]["location"][:38] == "Pennsylvania Department of Agriculture"
 
-    #This is just to break it, otherwise we can use the previous statement to make it work
     assert parsed_items[1]["location"][:38] == "yo"
 
 
 
 
 # def test_start():
+
+    #So actually, instead of doing time notes - which I'm not even sure what those refer to actually...
+    #We are returning the start time as a datetime object
+    #Apprently thats true for the end time as well
+    #It would be year, month, day, hour, minutes
+    #So for example if it starts at 6:30 it would be
 #     assert parsed_items[0]["start"] == datetime(2019, 1, 1, 0, 0)
 
 

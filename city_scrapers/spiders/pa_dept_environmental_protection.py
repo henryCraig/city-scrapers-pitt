@@ -2,30 +2,20 @@ from city_scrapers_core.constants import NOT_CLASSIFIED
 from city_scrapers_core.items import Meeting
 from city_scrapers_core.spiders import CityScrapersSpider
 import re
+import datetime
 
 
-#This class is inheriting from the CityScrapersSpider, thats what it means when its taking it as an arg I guess
+
 class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
     name = "pa_dept_environmental_protection"
     agency = "PA Department of Environmental Protection"
-
-    #It looks like I might want to change this timezone to America/New_York
-    #Like the other spiders
     timezone = "America/New_York"
     allowed_domains = ["www.ahs.dep.pa.gov"]
     start_urls = ["http://www.ahs.dep.pa.gov/CalendarOfEvents/Default.aspx?list=true"]
     custom_settings = {'ROBOTSTXT_OBEY' : False}
 
-    #Hello? Is this thing tracking changes?
 
     def parse(self, response):
-        """
-        `parse` should always `yield` Meeting items.
-
-        Change the `_parse_title`, `_parse_start`, etc methods to fit your scraping
-        needs.
-        """
-
         for meetingChunk in response.xpath('//div[@class = "centered_div padtop"]').getall():
             if '<strong>' in meetingChunk:
                 meeting = Meeting(
@@ -34,15 +24,7 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
                     location = self._parse_location(meetingChunk),
                     time_notes = self._parse_time_notes(meetingChunk),
                     start = self._parse_start(meetingChunk),
-
-                    #AttributeError: 'str' object has no attribute 'xpath'
-                    #It's returning a bunch of strings, so It doesnt want me to use xpath anymore now
-
-                    #So the thing I want to do now is try to use regex on this
-
-                    # phoneNumRegex = re.compile(r'\d\d\d-\d\d\d-\d\d\d\d')
-                    # >>> mo = phoneNumRegex.search('My number is 415-555-4242.')
-                    # >>> print('Phone number found: ' + mo.group())
+                    end=self._parse_end(meetingChunk),
 
 
 
@@ -77,37 +59,55 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         return time_notes
 
     def _parse_description(self, item):
-        #class="DisplayTableData">This is an advisory board sub-committee meeting that is open to the public</td>
         descriptionRegex = re.compile(r'Description:(.)+')
         thisThing = descriptionRegex.search(item)
         return thisThing.group()[97:-5]
 
     def _parse_location(self, item):
-        # return {
-        #     "address": "",
-        #     "name": "",
-        # }
-
         descriptionRegex = re.compile(r'Location:(.)+')
         thisThing = descriptionRegex.search(item)
         return thisThing.group()[91:-5]
 
 
+    #What kind of classification are they looking for exactly?
     def _parse_classification(self, item):
         """Parse or generate classification from allowed options."""
         return NOT_CLASSIFIED
 
     def _parse_start(self, item):
-        """Parse start datetime as a naive datetime object."""
-        startRegex = re.compile(r'</strong>(.)+(a)')
+        dateRegex = re.compile(r'(\d)+/(\d)+/\d\d\d\d')
+        dateThing = dateRegex.search(item)
+        ds = dateThing.group().split("/")
 
-        #Batman|Tina Fey
 
-        thisThing = startRegex.search(item)
-        return thisThing.group()[10:]
 
+        #&nbsp;10:00
+        #I'm not crazy about this regex, but it wont find the "a" in "am",
+            #it's treating them like they arent letters for some reason
+        #startRegex = re.compile(r'</strong>(.)+:')
+
+        #This should always return the first instance anyway, so it will always work for the start
+        #It's the ones that have end times that will probably a little trickier
+        amRegex = re.compile(r'(\d)+:\d\d')
+        amThing = amRegex.search(item)
+        amSplit = amThing.group().split(":")
+
+        minutes = 0
+        if int(amSplit[1]) > 0:
+            minutes = int(amSplit[1])
+
+        d = datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), int(amSplit[0]), minutes)
+        return d
+
+    #Still working on this, cant seem to find "pm" either
     def _parse_end(self, item):
         """Parse end datetime as a naive datetime object. Added by pipeline if None"""
+        #amRegex = re.compile(r'(\d)+:\d\d')
+        pmRegex = re.compile(r'pm')
+        pmThing = pmRegex.search(item)
+
+        if pmRegex.match(item):
+            return "Found"
         return None
 
     def _parse_all_day(self, item):
