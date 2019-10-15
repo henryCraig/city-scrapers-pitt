@@ -1,12 +1,13 @@
 from datetime import datetime
 from os.path import dirname, join
 
-#import pytest
+# import pytest
 from freezegun import freeze_time
-#from city_scrapers_core.constants import NOT_CLASSIFIED
+# from city_scrapers_core.constants import NOT_CLASSIFIED
 from city_scrapers_core.utils import file_response
 
-from city_scrapers.spiders.pa_dept_environmental_protection import PaDeptEnvironmentalProtectionSpider
+from city_scrapers.spiders.pa_dept_environmental_protection import \
+    PaDeptEnvironmentalProtectionSpider
 
 test_response = file_response(
     join(dirname(__file__), "files", "pa_dept_environmental_protection.html"),
@@ -22,12 +23,6 @@ parsed_items = [item for item in spider.parse(test_response)]
 freezer.stop()
 
 
-
-"""
-Uncomment below
-"""
-
-
 def test_title():
     assert parsed_items[0]["title"] == "Agricultural Advisory Board (AAB) meeting"
 
@@ -38,9 +33,7 @@ def test_description():
 
 
 def test_location():
-    print("hello?")
     print(parsed_items[0]['location'])
-    print("There it is")
     assert parsed_items[0]["location"] == "Pennsylvania Department of Agricu"
 
 # """Pennsylvania Department of Agriculture

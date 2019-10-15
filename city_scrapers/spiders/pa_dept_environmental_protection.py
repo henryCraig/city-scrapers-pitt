@@ -27,7 +27,7 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
 
 
 
-                    #title = self._parse_title(item),
+                    # title = self._parse_title(item),
                     # description=self._parse_description(item),
                     # classification=self._parse_classification(item),
                     # start=self._parse_start(item),
@@ -39,11 +39,10 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
                     # source=self._parse_source(response),
                 )
 
-                #meeting["status"] = self._get_status(meeting)
-                #meeting["id"] = self._get_id(meeting)
+                # meeting["status"] = self._get_status(meeting)
+                # meeting["id"] = self._get_id(meeting)
 
                 yield meeting
-
 
     def _parse_title(self, item):
         titleRegex = re.compile(r'(am|pm) : (.)+</td>')
@@ -66,8 +65,7 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         thisThing = descriptionRegex.search(item)
         return thisThing.group()[91:-5]
 
-
-    #What kind of classification are they looking for exactly?
+    # What kind of classification are they looking for exactly?
     def _parse_classification(self, item):
         """Parse or generate classification from allowed options."""
         return NOT_CLASSIFIED
@@ -76,16 +74,6 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         dateRegex = re.compile(r'(\d)+/(\d)+/\d\d\d\d')
         dateThing = dateRegex.search(item)
         ds = dateThing.group().split("/")
-
-
-
-        #&nbsp;10:00
-        #I'm not crazy about this regex, but it wont find the "a" in "am",
-            #it's treating them like they arent letters for some reason
-        #startRegex = re.compile(r'</strong>(.)+:')
-
-        #This should always return the first instance anyway, so it will always work for the start
-        #It's the ones that have end times that will probably a little trickier
         amRegex = re.compile(r'(\d)+:\d\d')
         amThing = amRegex.search(item)
         amSplit = amThing.group().split(":")
@@ -97,12 +85,12 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         d = datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), int(amSplit[0]), minutes)
         return d
 
-    #Still working on this, cant seem to find "pm" either
+    # Still working on this, cant seem to find "pm" either
     def _parse_end(self, item):
         """Parse end datetime as a naive datetime object. Added by pipeline if None"""
-        #amRegex = re.compile(r'(\d)+:\d\d')
+        # amRegex = re.compile(r'(\d)+:\d\d')
         pmRegex = re.compile(r'pm')
-        pmThing = pmRegex.search(item)
+        # pmThing = pmRegex.search(item)
 
         if pmRegex.match(item):
             return "Found"
@@ -111,8 +99,6 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
     def _parse_all_day(self, item):
         """Parse or generate all-day status. Defaults to False."""
         return False
-
-
 
     def _parse_links(self, item):
         """Parse or generate links."""
