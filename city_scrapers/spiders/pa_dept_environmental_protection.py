@@ -1,8 +1,9 @@
+import datetime
+import re
+
 from city_scrapers_core.constants import NOT_CLASSIFIED
 from city_scrapers_core.items import Meeting
 from city_scrapers_core.spiders import CityScrapersSpider
-import re
-import datetime
 
 
 class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
@@ -23,9 +24,7 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
                     time_notes=self._parse_time_notes(meetingChunk),
                     start=self._parse_start(meetingChunk),
                     end=self._parse_end(meetingChunk),
-
-
-
+                    links=self._parse_links(meetingChunk),
 
                     # title = self._parse_title(item),
                     # description=self._parse_description(item),
@@ -49,6 +48,7 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         thisThing = titleRegex.search(item)
         return thisThing.group()[5:-5]
 
+    #TODO: Remove this time_notes parsing, because it just parsing the start time I think
     def _parse_time_notes(self, item):
         timeRegex = re.compile(r'(\d)+/(\d)+/\d\d\d\d')
         thisThing = timeRegex.search(item)
@@ -64,11 +64,6 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         descriptionRegex = re.compile(r'Location:(.)+')
         thisThing = descriptionRegex.search(item)
         return thisThing.group()[91:-5]
-
-    # What kind of classification are they looking for exactly?
-    def _parse_classification(self, item):
-        """Parse or generate classification from allowed options."""
-        return NOT_CLASSIFIED
 
     def _parse_start(self, item):
         dateRegex = re.compile(r'(\d)+/(\d)+/\d\d\d\d')
@@ -86,24 +81,45 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         return d
 
     # Still working on this, cant seem to find "pm" either
+    #It's unclear why I still can't find 'pm', but that being said I think
+    #I can use 'to d:dd' or something like that, because the 'to' only happens
+    #When there is an end time
     def _parse_end(self, item):
-        """Parse end datetime as a naive datetime object. Added by pipeline if None"""
         # amRegex = re.compile(r'(\d)+:\d\d')
         pmRegex = re.compile(r'pm')
         # pmThing = pmRegex.search(item)
 
-        if pmRegex.match(item):
-            return "Found"
+
+        # if linkThing != None:
+        #     return "Found"
+
         return None
 
+    #We don't need the email currently but we do need the occasional link that pops up
+    #I don't really understand what it means when they are talking about returning href vs. title, but I'll work on that later I think
+    def _parse_links(self, item):
+        #Finds the tag inside the href
+        linkRegex = re.compile(r'Web address(.)+.aspx(\w)*(\'|\")')
+        linkThing = linkRegex.search(item)
+
+
+        if linkThing != None:
+            linkThing = linkRegex.search(item)
+            #return linkThing.group()[117:-1]
+            return [{"href": str(linkThing.group()[117:-1]), "title": "more info"}]
+
+        #Interested in asking about this in the future
+        #Title always equals "more info" - so that seems easy
+        #return [{"href": "", "title": ""}]
+        return None
+
+
+
+    def _parse_classification(self, item):
+        return NOT_CLASSIFIED
+
     def _parse_all_day(self, item):
-        """Parse or generate all-day status. Defaults to False."""
         return False
 
-    def _parse_links(self, item):
-        """Parse or generate links."""
-        return [{"href": "", "title": ""}]
-
     def _parse_source(self, response):
-        """Parse or generate source."""
         return response.url

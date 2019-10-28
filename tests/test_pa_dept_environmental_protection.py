@@ -1,13 +1,14 @@
 from datetime import datetime
 from os.path import dirname, join
 
-# import pytest
-from freezegun import freeze_time
 # from city_scrapers_core.constants import NOT_CLASSIFIED
 from city_scrapers_core.utils import file_response
+# import pytest
+from freezegun import freeze_time
 
-from city_scrapers.spiders.pa_dept_environmental_protection import \
+from city_scrapers.spiders.pa_dept_environmental_protection import (
     PaDeptEnvironmentalProtectionSpider
+)
 
 test_response = file_response(
     join(dirname(__file__), "files", "pa_dept_environmental_protection.html"),
@@ -29,12 +30,22 @@ def test_title():
 
 def test_description():
     print("parsed_items[0]: ", parsed_items[0]["description"])
+    # This stupid thing only passes when you put a space at the end of it
+
+    print("links 1: ", parsed_items[1]["links"])
+    print("links 2: ", parsed_items[2]["links"])
+    print("links 3: ", parsed_items[3]["links"])
+
+
+
     assert parsed_items[0]["description"] == "Joint Meeting with Nutrient Management Advisory"
 
 
+# Need to alter this so it has the title and location in a dictionary
 def test_location():
     print(parsed_items[0]['location'])
     assert parsed_items[0]["location"] == "Pennsylvania Department of Agricu"
+
 
 # """Pennsylvania Department of Agriculture
 # 2301 North Cameron Street, Room 309
@@ -44,21 +55,18 @@ def test_location():
 def test_start():
     assert parsed_items[0]["start"] == datetime(2019, 8, 29, 9, 0)
 
+
 # def test_end():
 #     assert parsed_items[0]["end"] == datetime(2019, 1, 1, 0, 0)
-
 
 # def test_time_notes():
 #     assert parsed_items[0]["time_notes"] == "EXPECTED TIME NOTES"
 
-
 # def test_id():
 #     assert parsed_items[0]["id"] == "EXPECTED ID"
 
-
 # def test_status():
 #     assert parsed_items[0]["status"] == "EXPECTED STATUS"
-
 
 # def test_location():
 #     assert parsed_items[0]["location"] == {
@@ -66,21 +74,17 @@ def test_start():
 #         "address": "EXPECTED ADDRESS"
 #     }
 
-
 # def test_source():
 #     assert parsed_items[0]["source"] == "EXPECTED URL"
 
-
-# def test_links():
-#     assert parsed_items[0]["links"] == [{
-#       "href": "EXPECTED HREF",
-#       "title": "EXPECTED TITLE"
-#     }]
-
+def test_links():
+    assert parsed_items[1]["links"] == [{
+      "href": "https://www.dep.pa.gov/PublicParticipation/AdvisoryCommittees/WaterAdvisory/SAC/Pages/default.aspx",
+      "title": "more info"
+    }]
 
 # def test_classification():
 #     assert parsed_items[0]["classification"] == NOT_CLASSIFIED
-
 
 # @pytest.mark.parametrize("item", parsed_items)
 # def test_all_day(item):
