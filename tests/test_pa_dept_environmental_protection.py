@@ -31,11 +31,10 @@ def test_title():
 def test_description():
     print("parsed_items[0]: ", parsed_items[0]["description"])
     # This stupid thing only passes when you put a space at the end of it
-
-    print("links 1: ", parsed_items[1]["links"])
-    print("links 2: ", parsed_items[2]["links"])
-    print("links 3: ", parsed_items[3]["links"])
-
+    print(parsed_items[0]["end"])
+    print(parsed_items[1]["end"])
+    print(parsed_items[2]["end"])
+    print(parsed_items[3]["end"])
 
 
     assert parsed_items[0]["description"] == "Joint Meeting with Nutrient Management Advisory"
