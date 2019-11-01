@@ -14,6 +14,11 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
     start_urls = ["http://www.ahs.dep.pa.gov/CalendarOfEvents/Default.aspx?list=true"]
     custom_settings = {'ROBOTSTXT_OBEY': False}
 
+    # Things I need to work on currently:
+    # Fixing Start to take into account am or pm
+    # Fixing End to take into account am or pm
+    # Returning
+
     def parse(self, response):
         for meetingChunk in response.xpath('//div[@class = "centered_div padtop"]').getall():
             if '<strong>' in meetingChunk:
@@ -48,12 +53,8 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         thisThing = titleRegex.search(item)
         return thisThing.group()[5:-5]
 
-    # TODO: Remove this time_notes parsing, because it just parsing the start time I think
     def _parse_time_notes(self, item):
-        timeRegex = re.compile(r'(\d)+/(\d)+/\d\d\d\d')
-        thisThing = timeRegex.search(item)
-        time_notes = thisThing.group()
-        return time_notes
+        return None
 
     def _parse_description(self, item):
         descriptionRegex = re.compile(r'Description:(.)+')
@@ -66,39 +67,32 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         return thisThing.group()[91:-5]
 
     def _parse_links(self, item):
-        #Finds the tag inside the href
         linkRegex = re.compile(r'Web address(.)+.aspx(\w)*(\'|\")')
         linkThing = linkRegex.search(item)
-
-
-        if linkThing != None:
+        if linkThing is not None:
             linkThing = linkRegex.search(item)
             return [{"href": str(linkThing.group()[117:-1]), "title": "more info"}]
-
         return None
 
     def _parse_end(self, item):
-        # amRegex = re.compile(r'(\d)+:\d\d')
         pmRegex = re.compile(r'to (\d)+:\d\d')
         pmThing = pmRegex.search(item)
-
-        if pmThing != None:
+        if pmThing is not None:
             dateRegex = re.compile(r'(\d)+/(\d)+/\d\d\d\d')
             dateThing = dateRegex.search(item)
             ds = dateThing.group().split("/")
             pmSplit = pmThing.group()[2:].split(":")
-
             minutes = 0
             if int(pmSplit[1]) > 0:
                 minutes = int(pmSplit[1])
-
             return datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), int(pmSplit[0]), minutes)
-
         return None
 
     # New Issue for the start time - there is a single meeting that starts
     # in the PM, so I need to accomodate for that
     # Issue for future
+    # I think there might also be end times that end before noon
+    # So I need to check into that as well
     def _parse_start(self, item):
         dateRegex = re.compile(r'(\d)+/(\d)+/\d\d\d\d')
         dateThing = dateRegex.search(item)
@@ -111,14 +105,7 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         if int(amSplit[1]) > 0:
             minutes = int(amSplit[1])
 
-        d = datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), int(amSplit[0]), minutes)
-        return d
-
-
-
-    # We don't need the email currently but we do need the occasional link that pops up
-    # I don't really understand what it means when they are talking about returning href vs. title, but I'll work on that later I think
-
+        return datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), int(amSplit[0]), minutes)
 
     def _parse_classification(self, item):
         return NOT_CLASSIFIED

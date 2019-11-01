@@ -36,7 +36,6 @@ def test_description():
     print(parsed_items[2]["end"])
     print(parsed_items[3]["end"])
 
-
     assert parsed_items[0]["description"] == "Joint Meeting with Nutrient Management Advisory"
 
 
@@ -78,7 +77,8 @@ def test_start():
 
 def test_links():
     assert parsed_items[1]["links"] == [{
-      "href": "https://www.dep.pa.gov/PublicParticipation/AdvisoryCommittees/WaterAdvisory/SAC/Pages/default.aspx",
+      "href": """https://www.dep.pa.gov/PublicParticipation/
+        AdvisoryCommittees/WaterAdvisory/SAC/Pages/default.aspx""",
       "title": "more info"
     }]
 
