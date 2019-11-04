@@ -15,9 +15,13 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
     custom_settings = {'ROBOTSTXT_OBEY': False}
 
     # Things I need to work on currently:
-    # Fixing Start to take into account am or pm
-    # Fixing End to take into account am or pm
-    # Returning
+    # Fixing Start to take into account am or pm - DONE!
+    # Fixing End to take into account am or pm - DONE!
+    #   I would like to double check later on if the times
+    #   Are working correctly, because they should be going from 0-23
+    # Returning a list thing correctly for location
+    #   The test for location indicates that
+    # Setting up the tests correctly, and making sure they pass
 
     def parse(self, response):
         for meetingChunk in response.xpath('//div[@class = "centered_div padtop"]').getall():
@@ -30,17 +34,12 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
                     start=self._parse_start(meetingChunk),
                     end=self._parse_end(meetingChunk),
                     links=self._parse_links(meetingChunk),
+                    source=self._parse_source(meetingChunk),
+                    classification=self._parse_classification(meetingChunk),
 
-                    # title = self._parse_title(item),
-                    # description=self._parse_description(item),
+
                     # classification=self._parse_classification(item),
-                    # start=self._parse_start(item),
-                    # end=self._parse_end(item),
                     # all_day=self._parse_all_day(item),
-                    # time_notes=self._parse_time_notes(item),
-                    # location=self._parse_location(item),
-                    # links=self._parse_links(item),
-                    # source=self._parse_source(response),
                 )
 
                 # meeting["status"] = self._get_status(meeting)
@@ -77,41 +76,63 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
     def _parse_end(self, item):
         pmRegex = re.compile(r'to (\d)+:\d\d')
         pmThing = pmRegex.search(item)
+
         if pmThing is not None:
             dateRegex = re.compile(r'(\d)+/(\d)+/\d\d\d\d')
             dateThing = dateRegex.search(item)
             ds = dateThing.group().split("/")
+
             pmSplit = pmThing.group()[2:].split(":")
+            pmSplit[0] = int(pmSplit[0])
+
             minutes = 0
             if int(pmSplit[1]) > 0:
                 minutes = int(pmSplit[1])
-            return datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), int(pmSplit[0]), minutes)
+
+            twelveHourRegex = re.compile(r'to (\d)+:\d\d [a-z][a-z]')
+            twelveHourThing = twelveHourRegex.search(item)
+
+            if twelveHourThing.group()[-2:] == "pm":
+                if pmSplit[0] != 12:
+                    pmSplit[0] += 12
+
+            return datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), pmSplit[0], minutes)
+
         return None
 
-    # New Issue for the start time - there is a single meeting that starts
-    # in the PM, so I need to accomodate for that
-    # Issue for future
-    # I think there might also be end times that end before noon
-    # So I need to check into that as well
     def _parse_start(self, item):
         dateRegex = re.compile(r'(\d)+/(\d)+/\d\d\d\d')
         dateThing = dateRegex.search(item)
         ds = dateThing.group().split("/")
+
         amRegex = re.compile(r'(\d)+:\d\d')
         amThing = amRegex.search(item)
         amSplit = amThing.group().split(":")
+        amSplit[0] = int(amSplit[0])
+
+        twelveHourRegex = re.compile(r':\d\d [a-z][a-z]')
+        twelveHourThing = twelveHourRegex.search(item)
 
         minutes = 0
         if int(amSplit[1]) > 0:
             minutes = int(amSplit[1])
 
-        return datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), int(amSplit[0]), minutes)
+        # Handles starts in the PM
+        if twelveHourThing.group()[4:] == "pm":
+            if amSplit[0] != 12:
+                amSplit[0] += 12
 
+        return datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), amSplit[0], minutes)
+
+    # Not returning NOT_CLASSIFIED without the quotes
+    # Because it's saying nothing is defined for that
     def _parse_classification(self, item):
         return NOT_CLASSIFIED
 
     def _parse_all_day(self, item):
         return False
 
+    # Want to double check if this is appropriate code
     def _parse_source(self, response):
-        return response.url
+        return "http://www.ahs.dep.pa.gov/CalendarOfEvents/Default.aspx?list=true"
+        # return response.url
