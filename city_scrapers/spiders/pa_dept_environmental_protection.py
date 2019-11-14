@@ -15,10 +15,6 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
     custom_settings = {'ROBOTSTXT_OBEY': False}
 
     # Things I need to work on currently:
-    # Fixing Start to take into account am or pm - DONE!
-    # Fixing End to take into account am or pm - DONE!
-    #   I would like to double check later on if the times
-    #   Are working correctly, because they should be going from 0-23
     # Returning a list thing correctly for location
     #   The test for location indicates that
     # Setting up the tests correctly, and making sure they pass
@@ -36,7 +32,6 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
                     links=self._parse_links(meetingChunk),
                     source=self._parse_source(meetingChunk),
                     classification=self._parse_classification(meetingChunk),
-
 
                     # classification=self._parse_classification(item),
                     # all_day=self._parse_all_day(item),
@@ -61,9 +56,10 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
         return thisThing.group()[97:-5]
 
     def _parse_location(self, item):
-        descriptionRegex = re.compile(r'Location:(.)+')
+        descriptionRegex = re.compile('Location:</td>.*?</td>', re.DOTALL)
         thisThing = descriptionRegex.search(item)
-        return thisThing.group()[91:-5]
+        cleanString = thisThing.group()[91:].replace('\n', ' ')
+        return {"name": "Untitled", "address": cleanString[:-5]}
 
     def _parse_links(self, item):
         linkRegex = re.compile(r'Web address(.)+.aspx(\w)*(\'|\")')
@@ -124,8 +120,6 @@ class PaDeptEnvironmentalProtectionSpider(CityScrapersSpider):
 
         return datetime.datetime(int(ds[2]), int(ds[0]), int(ds[1]), amSplit[0], minutes)
 
-    # Not returning NOT_CLASSIFIED without the quotes
-    # Because it's saying nothing is defined for that
     def _parse_classification(self, item):
         return NOT_CLASSIFIED
 

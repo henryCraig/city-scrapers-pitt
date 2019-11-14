@@ -29,24 +29,17 @@ def test_title():
 
 
 def test_description():
-    print("parsed_items[0]: ", parsed_items[0]["description"])
-    # This stupid thing only passes when you put a space at the end of it
-    # That means I can fix my regex maybe?  Or maybe not im not sure
-    print(parsed_items[0]["start"])
-    print(parsed_items[1]["start"])
-    print(parsed_items[2]["start"])
-
-    assert parsed_items[0]["description"] == "Joint Meeting with Nutrient Management Advisory"
-
-# Need to alter this so it has the title and location in a dictionary
+    assert parsed_items[0]["description"] == "Joint Meeting with Nutrient Management Advisory "
 
 
 def test_location():
-    print(parsed_items[0]['location'])
-    assert parsed_items[0]["location"] == "Pennsylvania Department of Agricu"
-# """Pennsylvania Department of Agriculture
-# 2301 North Cameron Street, Room 309
-# Harrisburg, PA 17110"""
+    assert parsed_items[0]["location"] == {
+        "name": "Untitled",
+        "address": (
+            "Pennsylvania Department of Agriculture  "
+            "2301 North Cameron Street, Room 309  Harrisburg, PA 17110"
+        )
+    }
 
 
 def test_start():
@@ -56,21 +49,6 @@ def test_start():
 def test_end():
     assert parsed_items[0]["end"] == datetime(2019, 8, 29, 12, 0)
 
-# def test_time_notes():
-#     assert parsed_items[0]["time_notes"] == "EXPECTED TIME NOTES"
-
-# def test_id():
-#     assert parsed_items[0]["id"] == "EXPECTED ID"
-
-# def test_status():
-#     assert parsed_items[0]["status"] == "EXPECTED STATUS"
-
-# def test_location():
-#     assert parsed_items[0]["location"] == {
-#         "name": "EXPECTED NAME",
-#         "address": "EXPECTED ADDRESS"
-#     }
-
 
 def test_source():
     src = "http://www.ahs.dep.pa.gov/CalendarOfEvents/Default.aspx?list=true"
@@ -79,14 +57,26 @@ def test_source():
 
 def test_links():
     assert parsed_items[1]["links"] == [{
-        "href": ("https://www.dep.pa.gov/PublicParticipation/"
-                 "AdvisoryCommittees/WaterAdvisory/SAC/Pages/default.aspx"),
+        "href": (
+            "https://www.dep.pa.gov/PublicParticipation/"
+            "AdvisoryCommittees/WaterAdvisory/SAC/Pages/default.aspx"
+        ),
         "title": "more info"
     }]
 
 
 def test_classification():
     assert parsed_items[0]["classification"] == NOT_CLASSIFIED
+
+
+# def test_time_notes():
+#     assert parsed_items[0]["time_notes"] == "EXPECTED TIME NOTES"
+
+# def test_id():
+#     assert parsed_items[0]["id"] == "EXPECTED ID"
+
+# def test_status():
+#     assert parsed_items[0]["status"] == "EXPECTED STATUS"
 
 # @pytest.mark.parametrize("item", parsed_items)
 # def test_all_day(item):
